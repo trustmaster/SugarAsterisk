@@ -1,0 +1,62 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:          asterisk_logger
+# Required-Start:    $local_fs $network
+# Required-Stop:     $local_fs $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts asterisk logger daemon
+# Description:       starts asterisk logger using
+### END INIT INFO
+
+PROC="asteriskLogger"
+DAEMON="php /var/www/crm/AsteriskManager/$PROC.php"
+LOGFILE="/tmp/$PROC.log"
+NAME=asterisk_logger
+DESC=asterisk_logger
+USER=www-data
+
+set -e
+
+. /lib/lsb/init-functions
+
+start_logger() {
+	sudo -u $USER $DAEMON > $LOGFILE < /dev/null &
+}
+
+stop_logger() {
+	for i in `ps ax | grep $PROC | cut -d ' ' -f 1`
+        do
+                kill -9 $i
+        done
+        for i in `ps ax | grep $PROC | cut -d ' ' -f 2`
+        do
+                kill -9 $i
+        done
+}
+
+case "$1" in
+  start)
+	echo -n "Starting $DESC: "
+	start_logger
+	echo "$NAME."
+	;;
+  stop)
+	echo -n "Stopping $DESC: "
+	stop_logger
+	echo "$NAME."
+	;;
+  restart)
+	echo -n "Restarting $DESC: "
+	stop_logger
+	start_logger
+	echo "$NAME."
+	;;
+     *)
+	echo "Usage: $NAME {start|stop|restart}" >&2
+	exit 1
+	;;
+esac
+
+exit 0

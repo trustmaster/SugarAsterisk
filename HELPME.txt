@@ -1,0 +1,51 @@
+
+####### how the fucking is working in sugarcrm framework -> the checkbox ???? #######
+we have test this .. can anyone help?
+####
+/var/www/html/crm/modules/Users/language/en_us.lang.php
+'LBL_ASTERISK_INBOUND' => 'Asterisk Inbound 1=on 0=off',	
+'LBL_ASTERISK_OUTBOUND' => 'Asterisk Outbound 1=on 0=off',	
+'LBL_ASTERISK_INBOUND_DESC' => 'if selected the users extension will be added to the listener and the user will be notified if a new call is coming in and also see calls going out',
+'LBL_ASTERISK_OUTBOUND_DESC' => 'if selected the user will be enabled to dial out clicking on the phone number of a contact',
+
+/var/www/html/crm/modules/Users/DetailView.html
+<td class="tabDetailViewDL"><slot>{MOD.LBL_ASTERISK_OUTBOUND}:</slot></td>
+<td class="tabDetailViewDF"><slot><input class="checkbox" type="checkbox" disabled {ASTERISK_OUTBOUND_C}></slot></td>
+<td class="tabDetailViewDF"><slot>{MOD.LBL_STERISK_OUTBOUND_DESC}&nbsp;</slot></td>
+
+<td class="tabDetailViewDL"><slot>{MOD.LBL_ASTERISK_INBOUND}:</slot></td>
+<td class="tabDetailViewDF"><slot><input class="checkbox" type="checkbox" disabled {ASTERISK_INBOUND_C}></slot></td>
+<td class="tabDetailViewDF"><slot>{MOD.LBL_ASTERISK_INBOUND_DESC}&nbsp;</slot></td>
+
+/var/www/html/crm/modules/Users/EditView.html
+<td class="dataLabel"><slot>{MOD.LBL_ASTERISK_OUTBOUND}</slot></td>
+<td class="dataField"><slot><input name='asterisk_outbound_c' class="checkbox" tabindex='3' type="checkbox" value="1" {ASTERISK_OUTBOUND_C}></slot></td>
+<td class="dataField"><slot>{MOD.LBL_ASTERISK_OUTBOUND_DESC}</slot></td>
+
+<td class="dataLabel"><slot>{MOD.LBL_ASTERISK_INBOUND}</slot></td>
+<td class="dataField"><slot><input name='asterisk_inbound_c' class="checkbox" tabindex='3' type="checkbox" value="1" {ASTERISK_INBOUND_C}></slot></td>
+<td class="dataField"><slot>{MOD.LBL_ASTERISK_INBOUND_DESC}</slot></td>
+
+/var/www/html/crm/modules/Users/DetailView.php
+if ($focus->asterisk_outbound_c) $xtpl->assign("ASTERISK_OUTBOUND_C", "checked");
+if ($focus->asterisk_inbound_c) $xtpl->assign("ASTERISK_INBOUND_C", "checked");
+
+/var/www/html/crm/modules/Users/EditView.php
+if ($focus->asterisk_outbound_c) $xtpl->assign("ASTERISK_OUTBOUND_C", "checked");
+if ($focus->asterisk_inbound_c) $xtpl->assign("ASTERISK_INBOUND_C", "checked");
+
+/var/www/html/crm/modules/Users/EditView.php
+if($focus->asterisk_outbound_c ==  true) $xtpl->assign("ASTERISK_OUTBOUND_C", "checked");
+if($focus->asterisk_inbound_c == true) $xtpl->assign("ASTERISK_INBOUND_C", "checked");
+
+####
+Database :
+id_c 									asterisk_outbound_c 	asterisk_inbound_c 	asterisk_ext_c
+1 											1 						1 					25
+37399fb0-d1ed-165c-2886-4a24f1371c33 		1 						1 					12
+
+### no change to install a checkbox we giv up :-( #########
+
+
+
+		
