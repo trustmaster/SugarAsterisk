@@ -33,6 +33,7 @@ This is a modified version of SugarAsterisk module originally made by KINAMU/abc
 ## Changelog ##
 
 v1.2 for v6.2 (by Vladimir Sibirov):
+
 * Updated asteriskLogger for Asterisk 1.8 protocol.
 * Some fixes to work with SugarCRM 6.2 (tested on 6.2.1 and 6.2.4)
 * Improved asteriskLogger persistence (automatically reconnects when MySQL or SOAP connection is lost).
