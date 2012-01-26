@@ -71,7 +71,8 @@ include_once($sugarRoot . 'config_override.php');
 //
 // Connect to mySQL DB
 //
-$sql_connection = mysql_connect($sugar_config['dbconfig']['db_host_name'], $sugar_config['dbconfig']['db_user_name'], $sugar_config['dbconfig']['db_password']);
+$sql_connection = mysql_connect($sugar_config['dbconfig']['db_host_name'], $sugar_config['dbconfig']['db_user_name'],
+	$sugar_config['dbconfig']['db_password']);
 $sql_db = mysql_select_db($sugar_config['dbconfig']['db_name']);
 // Prune asterisk_log
 // Note only use this for development
@@ -176,7 +177,7 @@ while (!feof($amiSocket))
 			$soapSessionId = soapLogin($soapClient, $auth_array);
 			$soapLoginTime = time();
 		}
-		
+
 		$event_started = false;
 		// parse the event and get the result hashtable
 		$e = getEvent($event);
@@ -229,7 +230,8 @@ while (!feof($amiSocket))
 				{
 					$assignedNum = $numSplit[1];
 				}
-				$query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, callerID, recipientID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", /* $e['SrcUniqueID'] */ $e['UniqueID'], $callRecordId, $e['Destination'], 'Dial', 'I', $tmpCallerID, $assignedNum, 'NOW()'
+				$query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, callerID, recipientID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", /* $e['SrcUniqueID'] */
+					$e['UniqueID'], $callRecordId, $e['Destination'], 'Dial', 'I', $tmpCallerID, $assignedNum, 'NOW()'
 				);
 				$callDirection = $mod_strings['INTERNAL'];
 			}
@@ -237,13 +239,15 @@ while (!feof($amiSocket))
 			{
 				// Outbound call
 				// Tack call assignee in recipientID
-				$assignedNum = $e['CallerIDNum'];
+				$recipientID = $e['CallerIDNum'];
 				$numSplit = array();
-				if (preg_match('#^sip/(\d+)-#i', $e['Channel'], $numSplit))
+				if (preg_match('#^(.+?)/(\d+)#i', $e['Dialstring'], $numSplit))
 				{
-					$assignedNum = $numSplit[1];
+					$recipientID = $numSplit[2];
 				}
-				$query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, callerID, recipientID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", $e['UniqueID'], $callRecordId, /* $e['Source'] */ $e['Dialstring'], 'NeedID', 'O', $tmpCallerID, $assignedNum, 'NOW()'
+				$query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, callerID, recipientID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)",
+					$e['UniqueID'], $callRecordId, /* $e['Source'] */ $e['Dialstring'], 'NeedID', 'O', $tmpCallerID, $recipientID,
+					'NOW()'
 				);
 				$callDirection = $mod_strings['OUTBOUND'];
 			}
@@ -257,7 +261,8 @@ while (!feof($amiSocket))
 				{
 					$assignedNum = $numSplit[1];
 				}
-				$query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, callerID, recipientID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", /* $e['SrcUniqueID'] */ $e['UniqueID'], $callRecordId, $e['Destination'], 'Dial', 'I', $tmpCallerID, $assignedNum, 'NOW()'
+				$query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, callerID, recipientID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", /* $e['SrcUniqueID'] */
+					$e['UniqueID'], $callRecordId, $e['Destination'], 'Dial', 'I', $tmpCallerID, $assignedNum, 'NOW()'
 				);
 				$callDirection = $mod_strings['INBOUND'];
 			}
@@ -272,7 +277,7 @@ while (!feof($amiSocket))
 				'name_value_list' => array(
 					array('name' => 'id', 'value' => $callRecordId),
 					array('name' => 'direction', 'value' => $callDirection),
-					));
+				));
 
 			$result = $soapClient->call('set_entry', $set_entry_params);
 			// TODO: Error checking!
@@ -312,7 +317,8 @@ while (!feof($amiSocket))
 				// update entry in asterisk_log...
 				//
                 $rawData = $callRecord['bitter']; // raw data from asterisk_log
-				$query = sprintf("UPDATE asterisk_log SET callstate='%s', timestampHangup=%s, hangup_cause=%d, hangup_cause_txt='%s' WHERE asterisk_id='%s'", 'Hangup', 'NOW()', $e['Cause'], $e['Cause-txt'], $id
+				$query = sprintf("UPDATE asterisk_log SET callstate='%s', timestampHangup=%s, hangup_cause=%d, hangup_cause_txt='%s' WHERE asterisk_id='%s'",
+					'Hangup', 'NOW()', $e['Cause'], $e['Cause-txt'], $id
 				);
 				$updateResult = mysql_checked_query($query);
 				if ($updateResult)
@@ -320,24 +326,24 @@ while (!feof($amiSocket))
 					//
 					// Attempt to find assigned user by asterisk ext
 					//
-		    $direction = $rawData['direction'];
+					$direction = $rawData['direction'];
 					$assignedUser = $userGUID; // Use logged in user as fallback
 					$channel = $rawData['channel'];
-					$assignedUser = findUserByAsteriskExtension($rawData['recipientID']);
-//                    $channelSplit = array();
-//		    if ($direction == 'O') {
-//			// Assigned user is the caller
-//			$assignedUser = findUserByAsteriskExtension($rawData['callerID']);
-//		    } else {
-//			if (preg_match('#^([a-zA-Z]+)/([a-z0-9]+)#i', $channel, $channelSplit) > 0) {
-//			    $asteriskExt = $channelSplit[2];
-//			    echo "# Extension was " . $asteriskExt . "\n";
-//			    $maybeAssignedUser = findUserByAsteriskExtension($asteriskExt);
-//			    if ($maybeAssignedUser) {
-//				$assignedUser = $maybeAssignedUser;
-//			    }
-//			}
-//		    }
+
+					if ($direction == 'O')
+					{
+						// Assigned user is the caller
+						$assignedUser = findUserByAsteriskExtension($rawData['callerID']);
+					}
+					else
+					{
+						echo "# Extension was " . $rawData['recipientID'] . "\n";
+						$maybeAssignedUser = findUserByAsteriskExtension($rawData['recipientID']);
+						if ($maybeAssignedUser)
+						{
+							$assignedUser = $maybeAssignedUser;
+						}
+					}
 
 
 					echo "# Channel was $channel\n";
@@ -351,7 +357,7 @@ while (!feof($amiSocket))
 					//
                     $hangupTime = time();
 					$callStart = strtotime($rawData['timestampCall']);
-					$callDurationRaw = 0;	// call duration in seconds, only matters if timestampLink != NULL
+					$callDurationRaw = 0; // call duration in seconds, only matters if timestampLink != NULL
 					if ($rawData['timestampLink'] != NULL)
 					{
 						$callStartLink = strtotime($rawData['timestampLink']);
@@ -391,15 +397,12 @@ while (!feof($amiSocket))
 						$callDescription .= sprintf(" %-20s : %-40s\n", $mod_strings['CALLERID'], $rawData['callerID']);
 					}
 
-					// ** EXPERIMENTAL **
+					// Detect account and contact references
 					$contactNum = $contactNum = $rawData['callerID'];
 					if ($direction == 'O')
 					{
 						// Contact is whom we called
-						if (preg_match('#^([a-zA-Z]+)/([a-z0-9\+]+)#i', $channel, $channelSplit) > 0)
-						{
-							$contactNum = $channelSplit[2];
-						}
+						$contactNum = $rawData['recipientID'];
 					}
 					else
 					{
@@ -407,19 +410,35 @@ while (!feof($amiSocket))
 						$contactNum = $rawData['callerID'];
 					}
 					$accountPhoneNumber = $contactNum;
-					// FIXME add other international codes here
-					$assoSugarObject = findSugarObjectByPhoneNumber(preg_replace('#^(\+7|8)#', '', $accountPhoneNumber));
-					$parentID = NULL;
-					$parentType = NULL;
-					if ($assoSugarObject && ($assoSugarObject['type'] == 'Contacts'))
+					
+					// Try to find associated Account first in case the call is being made
+					// from a generic company number
+					$accountId = findAccountByPhoneNumber($accountPhoneNumber);
+					if ($accountId)
 					{
-						$assocAccount = isset($assoSugarObject['values']['id']) ? findAccountForContact($assoSugarObject['values']['id']) : FALSE;
-						if ($assocAccount)
+						// Is a shared company phone, link to a company only
+						$parentType = 'Accounts';
+						$parentID = $accountId;
+						$assoSugarObject = false; // no contact
+					}
+					else
+					{
+						// Attempt to find a Contact an individual number
+						$assoSugarObject = findContactByPhoneNumber($accountPhoneNumber);
+						// Try to find a parent company
+						$parentID = NULL;
+						$parentType = NULL;
+						if ($assoSugarObject && ($assoSugarObject['type'] == 'Contacts'))
 						{
-							$parentType = 'Accounts';
-							$parentID = $assocAccount;
+							$assocAccount = isset($assoSugarObject['values']['id']) ? findAccountForContact($assoSugarObject['values']['id']) : FALSE;
+							if ($assocAccount)
+							{
+								$parentType = 'Accounts';
+								$parentID = $assocAccount;
+							}
 						}
 					}
+					
 
 					echo ("! Call start was " . gmdate('Y-m-d H:i:s', $callStart) . "\n");
 
@@ -428,7 +447,8 @@ while (!feof($amiSocket))
 					//
                     print "# SQL update successfull, now updating record in /Calls/...\n";
 
-					$soapResult = $soapClient->call('set_entry', array(
+					$soapResult = $soapClient->call('set_entry',
+						array(
 						'session' => $soapSessionId,
 						'module_name' => 'Calls',
 						'name_value_list' => array(
@@ -439,13 +459,13 @@ while (!feof($amiSocket))
 							array('name' => 'duration_seconds', 'value' => $callDurationSeconds),
 							array('name' => 'status', 'value' => $callStatus),
 							array('name' => 'description', 'value' => $callDescription),
-							array('name' => 'asterisk_caller_id_c', 'value' => /* $rawData['callerID'] */$contactNum),
+							array('name' => 'asterisk_caller_id_c', 'value' => $contactNum),
 							array('name' => 'date_start', 'value' => gmdate('Y-m-d H:i:s', $callStart)),
 							array('name' => 'parent_type', 'value' => $parentType),
 							array('name' => 'parent_id', 'value' => $parentID),
 							array('name' => 'assigned_user_id', 'value' => $assignedUser),
 						)
-							));
+						));
 
 					//
 					// Establish Relationship if possible
@@ -468,6 +488,23 @@ while (!feof($amiSocket))
 							$soapResult = $soapClient->call('set_relationship', $soapArgs);
 							// var_dump($soapResult);
 						}
+					}
+					
+					if ($parentID)
+					{
+						echo "# Establishing relation to account...\n";
+						$soapArgs = array(
+							'session' => $soapSessionId,
+							'set_relationship_value' => array(
+								'module1' => 'Calls',
+								'module1_id' => $callRecord['sweet']['id'],
+								'module2' => 'Accounts',
+								'module2_id' => $parentID,
+							)
+						);
+						// var_dump($soapArgs);
+						$soapResult = $soapClient->call('set_relationship', $soapArgs);
+						// var_dump($soapResult);
 					}
 				}
 			}
@@ -576,7 +613,8 @@ function findCallByAsteriskId($asteriskId)
 		//
 		// ... then locate Object in Calls module:
 		//
-        $soapResult = $soapClient->call('get_entry', array('session' => $soapSessionId, 'module_name' => 'Calls', 'id' => $callRecId));
+        $soapResult = $soapClient->call('get_entry',
+			array('session' => $soapSessionId, 'module_name' => 'Calls', 'id' => $callRecId));
 		$resultDecoded = decode_name_value_list($soapResult['entry_list'][0]['name_value_list']);
 		// echo ("# ** Soap call successfull, dumping result ******************************\n");
 		// var_dump($soapResult);
@@ -615,7 +653,7 @@ function decode_name_value_list($nvl)
 // Attempt to find a Sugar object (Contact,..) by phone number
 //
 //
-function findSugarObjectByPhoneNumber($aPhoneNumber)
+function findContactByPhoneNumber($aPhoneNumber)
 {
 	global $soapClient, $soapSessionId;
 	print("# +++ findSugarObjectByPhoneNumber($aPhoneNumber)\n");
@@ -661,13 +699,66 @@ function findSugarObjectByPhoneNumber($aPhoneNumber)
 }
 
 //
-// Replace a phone number to search with a universal-match-anyway(tm) expression to be used
-// in a SQL 'LIKE' condition - eg 1234 --> %1%2%3%4%
+// Prepares a phone number for search in the database
 //
 function regexify($aPhoneNumber)
 {
-	return '%' . $aPhoneNumber . '%';
-//    return '%' . join('%', str_split($aPhoneNumber)) . '%';
+	global $calloutPrefix;
+	// only numbers
+	$aPhoneNumber = preg_replace('#\D#', '', $aPhoneNumber);
+	// delete leading zeros
+	$aPhoneNumber = ltrim($aPhoneNumber, '0');
+	if (empty($calloutPrefix))
+	{
+		// Remove callout prefix by phone number length
+		// (probably works for Russia only, others should use callout prefix config)
+		if (strlen($aPhoneNumber) == 11)
+		{
+			$aPhoneNumber = substr($aPhoneNumber, 1);
+		}
+	}
+	return '%' . $aPhoneNumber;
+}
+
+// Finds an account by given phone number
+function findAccountByPhoneNumber($aPhoneNumber)
+{
+	global $soapClient, $soapSessionId;
+	print("# +++ findAccountByPhoneNumber($aPhoneNumber)\n");
+
+	$searchPattern = regexify($aPhoneNumber);
+
+    $soapArgs = array(
+		'session' => $soapSessionId,
+		'module_name' => 'Accounts',
+		'query' => "((accounts.phone_office LIKE '$searchPattern') OR (accounts.phone_alternate LIKE '$searchPattern'))",
+	);
+
+	// print "--- SOAP get_entry_list() ----- ARGS ----------------------------------------\n";
+	// var_dump($soapArgs);
+	// print "-----------------------------------------------------------------------------\n";
+
+	$soapResult = $soapClient->call('get_entry_list', $soapArgs);
+
+//     print "--- SOAP get_entry_list() ----- RESULT --------------------------------------\n";
+//     var_dump($soapResult);
+//     print "-----------------------------------------------------------------------------\n";
+
+	if ($soapResult['error']['number'] != 0)
+	{
+		echo "! Warning: SOAP error " . $soapResult['error']['number'] . " " . $soapResult['error']['string'] . "\n";
+	}
+	elseif (count($soapResult['entry_list']) > 0)
+	{
+//		print "--- SOAP get_entry_list() ----- RESULT --------------------------------------\n";
+//		var_dump($soapResult['entry_list'][0]);
+//		print "-----------------------------------------------------------------------------\n";
+		// Return just Account ID
+		return $soapResult['entry_list'][0]['id'];
+	}
+
+	// Oops nothing found :-(
+	return FALSE;
 }
 
 //
@@ -785,11 +876,13 @@ function mysql_checked_query($aQuery)
 		{
 			// Error occured
 			print("! SQL error " . mysql_errno() . " (" . mysql_error() . ")\n");
-			if (mysql_errno() == 2006) {
+			if (mysql_errno() == 2006)
+			{
 				// Server has gone away
 				print("! Trying to reconnect");
 				@mysql_close($sql_connection);
-				$sql_connection = mysql_connect($sugar_config['dbconfig']['db_host_name'], $sugar_config['dbconfig']['db_user_name'], $sugar_config['dbconfig']['db_password']);
+				$sql_connection = mysql_connect($sugar_config['dbconfig']['db_host_name'],
+					$sugar_config['dbconfig']['db_user_name'], $sugar_config['dbconfig']['db_password']);
 				$sql_db = mysql_select_db($sugar_config['dbconfig']['db_name']);
 				print("! Trying the query again");
 				mysql_checked_query($aQuery);
@@ -822,7 +915,7 @@ function soapLogin($soapClient, $auth_array)
 	$userGUID = $soapClient->call('get_user_id', $soapSessionId);
 
 	print "! Successful SOAP login id=" . $soapSessionId . " user=" . $auth_array['user_auth']['user_name'] . " GUID=" . $userGUID . " error=" . $soapLogin['error']['name'] . "\n";
-	
+
 	return $soapSessionId;
 }
 

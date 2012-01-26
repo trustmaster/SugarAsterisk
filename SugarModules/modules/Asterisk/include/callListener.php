@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Asterisk SugarCRM Integration
  * (c) KINAMU Business Solutions AG 2009
@@ -33,8 +34,8 @@
  * Section 5 of the GNU General Public License version 3.
  *
  */
-
-if(!defined('sugarEntry'))define('sugarEntry', true);
+if (!defined('sugarEntry'))
+	define('sugarEntry', true);
 
 chdir("../");
 chdir("../");
@@ -50,7 +51,8 @@ session_start();
 //�include language
 
 $current_language = $_SESSION['authenticated_user_language'];
-if(empty($current_language)) {
+if (empty($current_language))
+{
 	$current_language = $sugar_config['default_language'];
 }
 require("custom/modules/Asterisk/language/" . $current_language . ".lang.php");
@@ -68,13 +70,15 @@ $cUser->db->query("DELETE FROM asterisk_log WHERE timestampCall + INTERVAL 1 HOU
 $query = " SELECT * FROM asterisk_log WHERE (callstate = 'Dial' OR callstate = 'Connected') AND (channel LIKE 'SIP/{$cUser->asterisk_ext_c}%')";
 
 $resultSet = $cUser->db->query($query, false);
-if($cUser->db->checkError()){
+if ($cUser->db->checkError())
+{
 	trigger_error("checkForNewStates-Query failed");
 }
 
 $response = array();
-while($row = $cUser->db->fetchByAssoc($resultSet)){
-	$cUser->db->query("INSERT INTO test_log VALUES(NOW, '".mysql_real_escape_string(serialize($row))."')");
+while ($row = $cUser->db->fetchByAssoc($resultSet))
+{
+	$cUser->db->query("INSERT INTO test_log VALUES(NOW, '" . mysql_real_escape_string(serialize($row)) . "')");
 	$item = array();
 	$item['asterisk_id'] = $row['asterisk_id'];
 
@@ -85,28 +89,28 @@ while($row = $cUser->db->fetchByAssoc($resultSet)){
 	//for opening the relevant phone record when call has been answered
 	$item['call_record_id'] = $row['call_record_id'];
 
-	if($row['direction'] == 'I'){
+	if ($row['direction'] == 'I')
+	{
 
 		// this call is coming in from a remote phone partner
 		$item['call_type'] = "ASTERISKLBL_COMING_IN";
 		$item['direction'] = "Inbound";
-
 	}
 
-	if($row['direction'] == 'O'){
+	if ($row['direction'] == 'O')
+	{
 
 		// this call is coming in from a remote phone partner
 		$item['call_type'] = "ASTERISKLBL_GOING_OUT";
 		$item['direction'] = "Outbound";
 		#$item['phone_number'] = $row['callerID'];
 		#$item['asterisk_name'] = $row['callerName'];
-
 	}
 
 	// Remove prepending dialout prefix if present
 
 	$tmpCallerID = trim($row['callerID']);
-	if ( (strlen($calloutPrefix) > 0)  && (strpos($tmpCallerID, $calloutPrefix) === 0) )
+	if ((strlen($calloutPrefix) > 0) && (strpos($tmpCallerID, $calloutPrefix) === 0))
 	{
 		$tmpCallerID = substr($tmpCallerID, strlen($calloutPrefix));
 	}
@@ -118,13 +122,11 @@ while($row = $cUser->db->fetchByAssoc($resultSet)){
 
 
 	// prepare phone number passed in
-	$phoneToFind =  preg_replace('#\D#', '', $item['phone_number']);
-
-	// delete leading zeros
-	$phoneToFind = ltrim($phoneToFind, '0');
+	$phoneToFind = regexify($item['phone_number']);
 
 	$found = array();
-	if(strlen($phoneToFind) > 0){
+	if (strlen($phoneToFind) > 0)
+	{
 		$sqlReplace = "
 			    replace(
 			    replace(
@@ -147,24 +149,47 @@ while($row = $cUser->db->fetchByAssoc($resultSet)){
 			";
 
 
-
-		$queryContact = "SELECT c.id as contact_id, first_name,	last_name,phone_work, phone_home, phone_mobile, phone_other, a.name as account_name, account_id
-                   FROM contacts c left join accounts_contacts ac on (c.id=ac.contact_id and ac.deleted=0) left join accounts a on (ac.account_id=a.id) WHERE ";
-		$queryContact .= sprintf($sqlReplace, "phone_work", $phoneToFind) . " OR ";
-		$queryContact .= sprintf($sqlReplace, "phone_home", $phoneToFind) . " OR ";
-		$queryContact .= sprintf($sqlReplace, "phone_other", $phoneToFind) . " OR ";
-		$queryContact .= sprintf($sqlReplace, "assistant_phone", $phoneToFind) . " OR ";
-		$queryContact .= sprintf($sqlReplace, "phone_mobile", $phoneToFind) . "";
-//                $queryContact .= "phone_work = '$phoneToFind' OR phone_mobile = '$phoneToFind'";
-
-		$innerResultSet = $cUser->db->query($queryContact, false);
-		while($contactRow = $cUser->db->fetchByAssoc($innerResultSet)){
-
-			$found['$contactFullName'] = $contactRow['first_name'] . " " . $contactRow['last_name'];
+		// First attempt to find a company Account in case it's a shared number
+		$queryAccount = "SELECT a.name as account_name, account_id, phone_office, phone_alternate
+                   FROM accounts a WHERE ";
+		$queryAccount .= sprintf($sqlReplace, "phone_office", $phoneToFind) . " OR ";
+		$queryAccount .= sprintf($sqlReplace, "phone_alternate", $phoneToFind);
+		$queryAccount .= " LIMIT 1";
+		$innerResultSet = $cUser->db->query($queryAccount, false);
+		if ($accountRow = $cUser->db->fetchByAssoc($innerResultSet))
+		{
 			$found['$company'] = $contactRow['account_name'];
-			$found['$contactId'] = $contactRow['contact_id'];
 			$found['$companyId'] = $contactRow['account_id'];
 		}
+		else
+		{
+			// It is probably an individual number, we should search in Contacts
+			$queryContact = "SELECT c.id as contact_id, first_name,	last_name,
+						phone_work, phone_home, phone_mobile, phone_other,
+						a.name as account_name, account_id
+				FROM contacts c
+					left join accounts_contacts ac on (c.id=ac.contact_id and ac.deleted=0)
+					left join accounts a on (ac.account_id=a.id)
+				WHERE ";
+			$queryContact .= sprintf($sqlReplace, "phone_work", $phoneToFind) . " OR ";
+			$queryContact .= sprintf($sqlReplace, "phone_home", $phoneToFind) . " OR ";
+			$queryContact .= sprintf($sqlReplace, "phone_other", $phoneToFind) . " OR ";
+			$queryContact .= sprintf($sqlReplace, "assistant_phone", $phoneToFind) . " OR ";
+			$queryContact .= sprintf($sqlReplace, "phone_mobile", $phoneToFind);
+			$queryContact .= " LIMIT 1";
+
+			$innerResultSet = $cUser->db->query($queryContact, false);
+			if ($contactRow = $cUser->db->fetchByAssoc($innerResultSet))
+			{
+
+				$found['$contactFullName'] = $contactRow['first_name'] . " " . $contactRow['last_name'];
+				$found['$company'] = $contactRow['account_name'];
+				$found['$contactId'] = $contactRow['contact_id'];
+				$found['$companyId'] = $contactRow['account_id'];
+			}
+		}
+		
+		
 	}
 	$item['full_name'] = isset($found['$contactFullName']) ? $found['$contactFullName'] : "";
 
@@ -173,14 +198,18 @@ while($row = $cUser->db->fetchByAssoc($resultSet)){
 	$item['company_id'] = isset($found['$companyId']) ? $found['$companyId'] : "";
 
 	$response[] = $item;
-	}
+}
 
 header("Content-Type: application/json");
 $responseArray = array();
-if(count($response) == 0){
+if (count($response) == 0)
+{
 	print json_encode(array("."));
-}else{
-	foreach($response as $item){
+}
+else
+{
+	foreach ($response as $item)
+	{
 		ob_start();
 		require("custom/modules/Asterisk/include/ShowCall.html");
 		$item['html'] = ob_get_contents();
@@ -196,5 +225,27 @@ if(count($response) == 0){
 }
 
 sugar_cleanup();
+
+//
+// Prepares a phone number for search in the database
+//
+function regexify($aPhoneNumber)
+{
+	global $calloutPrefix;
+	// only numbers
+	$aPhoneNumber = preg_replace('#\D#', '', $aPhoneNumber);
+	// delete leading zeros
+	$aPhoneNumber = ltrim($aPhoneNumber, '0');
+	if (empty($calloutPrefix))
+	{
+		// Remove callout prefix by phone number length
+		// (probably works for Russia only, others should use callout prefix config)
+		if (strlen($aPhoneNumber) == 11)
+		{
+			$aPhoneNumber = substr($aPhoneNumber, 1);
+		}
+	}
+	return '%' . $aPhoneNumber;
+}
 
 ?>
