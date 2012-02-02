@@ -1,8 +1,8 @@
 <?php
 $mod_strings = array (
   'VALUE' => 'CallerId',
-  'LBL_ASTERISK_CALLER_ID' => 'Íîìåð òåëåôîíà',
-  'LBL_ASTERISK_LISTEN' => 'Ïðîñëóøàòü',
-  'LBL_ASTERISK_DOWNLOAD' => 'Ñêà÷àòü'
+  'LBL_ASTERISK_CALLER_ID' => 'ÐÐ¾Ð¼ÐµÑ€ Ñ‚ÐµÐ»ÐµÑ„Ð¾Ð½Ð°',
+  'LBL_ASTERISK_LISTEN' => 'ÐŸÑ€Ð¾ÑÐ»ÑƒÑˆÐ°Ñ‚ÑŒ',
+  'LBL_ASTERISK_DOWNLOAD' => 'Ð¡ÐºÐ°Ñ‡Ð°Ñ‚ÑŒ'
 );
 ?>
