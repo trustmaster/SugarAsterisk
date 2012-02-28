@@ -18,8 +18,9 @@ This is a modified version of SugarAsterisk module originally made by KINAMU/abc
 
 ## Installation ##
 
-1. Download this repository as a .zip package.
-2. Install the module via SugarCRM Administration / Module Wizard.
+1. Download or clone this repository.
+2. Put its contents in a Zip archive so that this file (README.md) is in the root of the .zip.
+2. Install the zipped module via SugarCRM Administration / Module Wizard.
 3. Copy AsteriskManager/asteriskLogger.php to some folder on your webserver.
 4. Copy init.d/asterisk_logger to /etc/init.d on your webserver. Edit this file, find DAEMON path and replace /var/www/crm/AsteriskManager/ with your path to asteriskLogger.php.
 5. Make sure asterisk_logger starts on system boot and run it at once: /etc/init.d/asterisk_logger start
