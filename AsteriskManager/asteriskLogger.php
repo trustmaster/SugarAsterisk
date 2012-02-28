@@ -238,20 +238,28 @@ while (!feof($amiSocket))
 			elseif (preg_match($asteriskMatchInternal, /* $e['Source'] */ $e['Channel']))
 			{
 				// Outbound call
-				$callerID = $tmpCallerID;
-				$chanSplit = array();
-				if (preg_match('#^sip/(\d+)-#i', $e['Channel'], $chanSplit))
-				{
-					$callerID = $chanSplit[1];
-				}
+				// Tack call target in recipientID
 				$recipientID = $e['CallerIDNum'];
 				$numSplit = array();
 				if (preg_match('#^(.+?)/(\d+)#i', $e['Dialstring'], $numSplit))
 				{
-					$recipientID = $numSplit[2];
+					if (strlen($numSplit[2]) > 10 && strlen($numSplit[2]) < 15)
+					{
+						$recipientID = substr($numSplit[2], -10);
+					}
+					else
+					{
+						$recipientID = $numSplit[2];
+					}
+				}
+				// Track call assignee in callerID
+				$assignedNum = $tmpCallerID;
+				if (preg_match('#^sip/(\d+)-#i', $e['Channel'], $numSplit))
+				{
+					$assignedNum = $numSplit[1];
 				}
 				$query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, callerID, recipientID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)",
-					$e['UniqueID'], $callRecordId, /* $e['Source'] */ $e['Dialstring'], 'NeedID', 'O', $callerID, $recipientID,
+					$e['UniqueID'], $callRecordId, /* $e['Source'] */ $e['Dialstring'], 'NeedID', 'O', $assignedNum, $recipientID,
 					'NOW()'
 				);
 				$callDirection = $mod_strings['OUTBOUND'];
