@@ -174,8 +174,7 @@ while (!feof($amiSocket))
 		// Reconnect to SOAP if session might expire
 		if (time() - $soapLoginTime > 600) // 10 minutes
 		{
-			$soapSessionId = soapLogin($soapClient, $auth_array);
-			$soapLoginTime = time();
+			soapReconnect();
 		}
 
 		$event_started = false;
@@ -205,7 +204,7 @@ while (!feof($amiSocket))
 					array('name' => 'assigned_user_id', 'value' => $userGUID))
 			);
 
-			$result = $soapClient->call('set_entry', $set_entry_params);
+			$result = soapCall('set_entry', $set_entry_params);
 			$callRecordId = $result['id'];
 			echo "! Successfully created CALL record with id=" . $callRecordId . "\n";
 
@@ -292,7 +291,7 @@ while (!feof($amiSocket))
 					array('name' => 'direction', 'value' => $callDirection),
 				));
 
-			$result = $soapClient->call('set_entry', $set_entry_params);
+			$result = soapCall('set_entry', $set_entry_params);
 			// TODO: Error checking!
 		}
 		//
@@ -460,7 +459,7 @@ while (!feof($amiSocket))
 					//
                     print "# SQL update successfull, now updating record in /Calls/...\n";
 
-					$soapResult = $soapClient->call('set_entry',
+					$soapResult = soapCall('set_entry',
 						array(
 						'session' => $soapSessionId,
 						'module_name' => 'Calls',
@@ -498,7 +497,7 @@ while (!feof($amiSocket))
 								)
 							);
 							// var_dump($soapArgs);
-							$soapResult = $soapClient->call('set_relationship', $soapArgs);
+							$soapResult = soapCall('set_relationship', $soapArgs);
 							// var_dump($soapResult);
 						}
 					}
@@ -516,7 +515,7 @@ while (!feof($amiSocket))
 							)
 						);
 						// var_dump($soapArgs);
-						$soapResult = $soapClient->call('set_relationship', $soapArgs);
+						$soapResult = soapCall('set_relationship', $soapArgs);
 						// var_dump($soapResult);
 					}
 				}
@@ -605,7 +604,7 @@ function dumpEvent(&$event)
 //
 function findCallByAsteriskId($asteriskId)
 {
-	global $soapClient, $soapSessionId;
+	global $soapSessionId;
 	print("# +++ findCallByAsteriskId($asteriskId)\n");
 
 	//
@@ -626,7 +625,7 @@ function findCallByAsteriskId($asteriskId)
 		//
 		// ... then locate Object in Calls module:
 		//
-        $soapResult = $soapClient->call('get_entry',
+        $soapResult = soapCall('get_entry',
 			array('session' => $soapSessionId, 'module_name' => 'Calls', 'id' => $callRecId));
 		$resultDecoded = decode_name_value_list($soapResult['entry_list'][0]['name_value_list']);
 		// echo ("# ** Soap call successfull, dumping result ******************************\n");
@@ -666,9 +665,9 @@ function decode_name_value_list($nvl)
 // Attempt to find a Sugar object (Contact,..) by phone number
 //
 //
-function findContactByPhoneNumber($aPhoneNumber)
+function findContactByPhoneNumber($aPhoneNumber, $retryCount = 0)
 {
-	global $soapClient, $soapSessionId;
+	global $soapSessionId;
 	print("# +++ findSugarObjectByPhoneNumber($aPhoneNumber)\n");
 
 	$searchPattern = regexify($aPhoneNumber);
@@ -688,7 +687,7 @@ function findContactByPhoneNumber($aPhoneNumber)
 	// var_dump($soapArgs);
 	// print "-----------------------------------------------------------------------------\n";
 
-	$soapResult = $soapClient->call('get_entry_list', $soapArgs);
+	$soapResult = soapCall('get_entry_list', $soapArgs);
 
 //     print "--- SOAP get_entry_list() ----- RESULT --------------------------------------\n";
 //     var_dump($soapResult);
@@ -734,9 +733,9 @@ function regexify($aPhoneNumber)
 }
 
 // Finds an account by given phone number
-function findAccountByPhoneNumber($aPhoneNumber)
+function findAccountByPhoneNumber($aPhoneNumber, $retryCount = 0)
 {
-	global $soapClient, $soapSessionId;
+	global $soapSessionId;
 	print("# +++ findAccountByPhoneNumber($aPhoneNumber)\n");
 
 	$searchPattern = regexify($aPhoneNumber);
@@ -751,7 +750,7 @@ function findAccountByPhoneNumber($aPhoneNumber)
 	// var_dump($soapArgs);
 	// print "-----------------------------------------------------------------------------\n";
 
-	$soapResult = $soapClient->call('get_entry_list', $soapArgs);
+	$soapResult = soapCall('get_entry_list', $soapArgs);
 
 //     print "--- SOAP get_entry_list() ----- RESULT --------------------------------------\n";
 //     var_dump($soapResult);
@@ -779,7 +778,7 @@ function findAccountByPhoneNumber($aPhoneNumber)
 //
 function findAccountForContact($aContactId)
 {
-	global $soapClient, $soapSessionId;
+	global $soapSessionId;
 	print("# +++ findAccountForContact($aContactId)\n");
 
 	$soapArgs = array(
@@ -791,7 +790,7 @@ function findAccountForContact($aContactId)
 		'deleted' => 0
 	);
 
-	$soapResult = $soapClient->call('get_relationships', $soapArgs);
+	$soapResult = soapCall('get_relationships', $soapArgs);
 
 	if ($soapResult['error']['number'] != '0')
 	{
@@ -830,9 +829,9 @@ function findAccountForContact($aContactId)
 //
 // Locate user by asterisk extension
 //
-function findUserByAsteriskExtension($aExtension)
+function findUserByAsteriskExtension($aExtension, $retryCount = 0)
 {
-	global $soapClient, $soapSessionId;
+	global $soapSessionId;
 	print("# +++ findUserByAsteriskExtension($aExtension)\n");
 
 	$soapArgs = array(
@@ -840,7 +839,7 @@ function findUserByAsteriskExtension($aExtension)
 		'module_name' => 'Users',
 		'query' => sprintf("(users_cstm.asterisk_ext_c='%s')", $aExtension)
 	);
-	$soapResult = $soapClient->call('get_entry_list', $soapArgs);
+	$soapResult = soapCall('get_entry_list', $soapArgs);
 
 	// var_dump($soapResult);
 
@@ -920,6 +919,21 @@ function mysql_checked_query($aQuery)
 	return $sqlResult;
 }
 
+// Calls a SOAP operation and attempts to retry if SOAP session expires
+function soapCall($operation, $params = array(), $retryCount = 0)
+{
+	global $soapClient;
+	$result = $soapClient->call($operation, $params);
+	if ($result['error']['number'] == 10 && $retryCount < 5)
+	{
+		// Session lost, try to reconnect and retry
+		soapReconnect();
+		$result = soapCall($operation, $params, $retryCount + 1);
+	}
+	return $result;
+}
+
+// Logs into Sugar SOAP and gets new session ID
 function soapLogin($soapClient, $auth_array)
 {
 	global $userGUID;
@@ -932,4 +946,13 @@ function soapLogin($soapClient, $auth_array)
 	return $soapSessionId;
 }
 
+// Renews SOAP session ID
+function soapReconnect()
+{
+	global $soapSessionId, $soapLoginTime, $soapClient, $auth_array;
+	$soapSessionId = soapLogin($soapClient, $auth_array);
+	$soapLoginTime = time();
+}
+
 ?>
+
