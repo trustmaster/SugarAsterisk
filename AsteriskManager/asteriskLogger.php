@@ -8,7 +8,7 @@
  * Parts of this code are (c) 2008 vertico software GmbH
  * Parts of this code are (c) 2009 abcona e. K. Angelo Malaguarnera E-Mail admin@abcona.de
  * http://www.sugarforge.org/projects/yaai/
- * Parts of this code are (c) 2011 Vladimir Sibirov contact@kodigy.com
+ * Parts of this code are (c) 2011-2012 Vladimir Sibirov contact@kodigy.com
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License version 3 as published by the
@@ -34,11 +34,6 @@
  * Section 5 of the GNU General Public License version 3.
  *
  */
-//
-// Debug flags
-//
-$mysql_loq_queries = 1;
-$mysql_log_results = 1;
 
 //
 // Say hello, setup include path(s)
@@ -46,7 +41,8 @@ $mysql_log_results = 1;
 define('sugarEntry', TRUE);
 print "**** asteriskLogger ****\n";
 
-// Determine SugarCRM's root dir (we'll use this to find the config filez
+// Determine SugarCRM's root dir (we'll use this to find the config files)
+$sugar_config = array();
 $scriptRoot = dirname(__FILE__);
 $sugarRoot = $scriptRoot . "/../";
 print "# Sugar root set to [$sugarRoot]\n";
@@ -66,14 +62,14 @@ require_once("nusoap/nusoap.php");
 // Pull in config file(s)
 //
 require_once($sugarRoot . 'config.php');
-include_once($sugarRoot . 'config_override.php');
+if (file_exists($sugarRoot . 'config_override.php')) include_once($sugarRoot . 'config_override.php');
 
 //
 // Connect to mySQL DB
 //
-$sql_connection = mysql_connect($sugar_config['dbconfig']['db_host_name'], $sugar_config['dbconfig']['db_user_name'],
+mysql_connect($sugar_config['dbconfig']['db_host_name'], $sugar_config['dbconfig']['db_user_name'],
 	$sugar_config['dbconfig']['db_password']);
-$sql_db = mysql_select_db($sugar_config['dbconfig']['db_name']);
+mysql_select_db($sugar_config['dbconfig']['db_name']);
 // Prune asterisk_log
 // Note only use this for development
 mysql_query('DELETE FROM asterisk_log');
@@ -92,6 +88,10 @@ $asteriskManagerPort = (int) $sugar_config['asterisk_port'];
 $asteriskUser = "Username: " . $sugar_config['asterisk_user'] . "\r\n";
 $asteriskSecret = "Secret: " . $sugar_config['asterisk_secret'] . "\r\n";
 $asteriskMatchInternal = $sugar_config['asterisk_expr'];
+if (!preg_match('`^(#|/).+\1[a-z]*$`', $asteriskMatchInternal))
+{
+	$asteriskMatchInternal = '#' . $asteriskMatchInternal . '#i';
+}
 
 // Fetch Asterisk dialprefix - must strip this from inbound callerIDs if set
 $calloutPrefix = isset($sugar_config['asterisk_prefix']) ? $sugar_config['asterisk_prefix'] : "";
@@ -100,6 +100,8 @@ echo("# Callout prefix is [$calloutPrefix]\n");
 print "# (Config processed)\n";
 
 // connect to Asterisk server
+$errno = null;
+$errstr = null;
 $amiSocket = fsockopen($asteriskServer, $asteriskManagerPort, $errno, $errstr, 5);
 
 if (!$amiSocket)
@@ -157,7 +159,6 @@ fputs($amiSocket, "Events: call\r\n\r\n");  // just monitor call data
 $result = fgets($amiSocket, 4096);
 echo("! Login action returned with rc=$result\n");
 $event = '';
-$stack = 0;
 
 $event_started = false;
 
@@ -526,7 +527,7 @@ while (!feof($amiSocket))
 		if ($e['Event'] == 'Bridge' && $e['Bridgestate'] == 'Link')
 		{
 			$query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=NOW() WHERE asterisk_id='" . $e['Uniqueid1'] . "' OR asterisk_id='" . $e['Uniqueid2'] . "'";
-			$rc = mysql_checked_query($query);
+			mysql_checked_query($query);
 
 			// und vice versa .. woher immer der call kam
 			// $query = "UPDATE asterisk_log SET callstate='Connected', timestampLink=NOW() WHERE asterisk_id='" . $e['Uniqueid2'] . "'";
@@ -589,7 +590,7 @@ function dumpEvent(&$event)
 		return;
 	}
 
-	$eventType = $event['Event'];
+	//$eventType = $event['Event'];
 
 	echo("! --- Event -----------------------------------------------------------\n");
 	foreach ($event as $eventKey => $eventValue)
@@ -665,7 +666,7 @@ function decode_name_value_list($nvl)
 // Attempt to find a Sugar object (Contact,..) by phone number
 //
 //
-function findContactByPhoneNumber($aPhoneNumber, $retryCount = 0)
+function findContactByPhoneNumber($aPhoneNumber)
 {
 	global $soapSessionId;
 	print("# +++ findSugarObjectByPhoneNumber($aPhoneNumber)\n");
@@ -733,7 +734,7 @@ function regexify($aPhoneNumber)
 }
 
 // Finds an account by given phone number
-function findAccountByPhoneNumber($aPhoneNumber, $retryCount = 0)
+function findAccountByPhoneNumber($aPhoneNumber)
 {
 	global $soapSessionId;
 	print("# +++ findAccountByPhoneNumber($aPhoneNumber)\n");
@@ -829,7 +830,7 @@ function findAccountForContact($aContactId)
 //
 // Locate user by asterisk extension
 //
-function findUserByAsteriskExtension($aExtension, $retryCount = 0)
+function findUserByAsteriskExtension($aExtension)
 {
 	global $soapSessionId;
 	print("# +++ findUserByAsteriskExtension($aExtension)\n");
@@ -924,7 +925,7 @@ function soapCall($operation, $params = array(), $retryCount = 0)
 {
 	global $soapClient;
 	$result = $soapClient->call($operation, $params);
-	if ($result['error']['number'] == 10 && $retryCount < 5)
+	if (isset($result['error']) && $result['error']['number'] == 10 && $retryCount < 5)
 	{
 		// Session lost, try to reconnect and retry
 		soapReconnect();
