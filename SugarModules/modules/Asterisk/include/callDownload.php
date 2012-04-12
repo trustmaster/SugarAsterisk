@@ -69,19 +69,31 @@ if (is_numeric($_GET['id'])) {
     // Load asterisk config from DB
     $sql_res = mysql_query("SELECT * FROM config WHERE category = 'asterisk'");
     while ($row = mysql_fetch_assoc($sql_res)) {
-	$sugar_config['asterisk_' . $row['name']] = $row['value'];
+		$sugar_config['asterisk_' . $row['name']] = $row['value'];
     }
-    $files = glob($sugar_config['asterisk_recordings'] . '/*' . $callID . '.wav');
-    if (count($files) == 1) {
-	$path = $files[0];
-	header('Content-Type: audio/wav');
-	header('Content-Length: ' . filesize($path));
-	if ($_GET['dl'])
-	{
-		header('Content-Disposition: attachment; filename="call_'.$callID.'.wav"');
+	$found = false;
+    $files_wav = glob($sugar_config['asterisk_recordings'] . '/*' . $callID . '.wav');
+	$files_mp3 = glob($sugar_config['asterisk_recordings'] . '/*' . $callID . '.mp3');
+	if (count($files_wav) == 1) {
+		$content_type = 'audio/wav';
+		$file_ext = 'wav';
+		$found = true;
+	} elseif (count($files_mp3) == 1) {
+		$content_type = 'audio/mpeg';
+		$file_ext = 'mp3';
+		$found = true;
 	}
-	readfile($path);
-	exit;
+	
+    if ($found) {
+		$path = $files[0];
+		header('Content-Type: ' . $content_type);
+		header('Content-Length: ' . filesize($path));
+		if ($_GET['dl'])
+		{
+			header('Content-Disposition: attachment; filename="call_'.$callID.'.'.$file_ext.'"');
+		}
+		readfile($path);
+		exit;
     }
 }
 
