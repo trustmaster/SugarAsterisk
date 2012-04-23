@@ -44,7 +44,7 @@ print "**** asteriskLogger ****\n";
 // Determine SugarCRM's root dir (we'll use this to find the config files)
 $sugar_config = array();
 $scriptRoot = dirname(__FILE__);
-$sugarRoot = $scriptRoot . "/../";
+$sugarRoot = realpath($scriptRoot . "/../../..").'/';
 print "# Sugar root set to [$sugarRoot]\n";
 set_include_path(get_include_path() . PATH_SEPARATOR . $sugarRoot . "include");
 print "# PHP include path set to [" . get_include_path() . "]\n";
