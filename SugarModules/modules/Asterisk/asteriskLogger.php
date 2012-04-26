@@ -53,7 +53,6 @@ print "# Sugar root set to [$sugarRoot]\n";
 set_include_path(get_include_path() . PATH_SEPARATOR . $sugarRoot . "include");
 print "# PHP include path set to [" . get_include_path() . "]\n";
 
-
 //
 // Required libraries
 //
@@ -67,6 +66,10 @@ require_once("nusoap/nusoap.php");
 //
 require_once($sugarRoot . 'config.php');
 if (file_exists($sugarRoot . 'config_override.php')) include_once($sugarRoot . 'config_override.php');
+
+// Load localization if available
+$locale_path = $sugarRoot . '/custom/modules/Asterisk/language/' . $sugar_config['default_language'] . '.lang.php';
+if (file_exists($locale_path)) include_once $locale_path;
 
 //
 // Connect to mySQL DB
