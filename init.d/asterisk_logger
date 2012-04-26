@@ -4,6 +4,7 @@
 # Provides:          asterisk_logger
 # Required-Start:    $local_fs $network
 # Required-Stop:     $local_fs $network
+# Should-Start:      apache2 asterisk mysql
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: starts asterisk logger daemon
@@ -11,7 +12,7 @@
 ### END INIT INFO
 
 PROC="asteriskLogger"
-DAEMON="php /var/www/crm/AsteriskManager/$PROC.php"
+DAEMON="php /var/www/crm/custom/modules/Asterisk/$PROC.php"
 LOGFILE="/tmp/$PROC.log"
 NAME=asterisk_logger
 DESC=asterisk_logger

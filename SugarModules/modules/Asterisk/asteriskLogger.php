@@ -35,6 +35,10 @@
  *
  */
 
+// Debug params
+$mysql_loq_queries = TRUE;
+$mysql_log_results = TRUE;
+
 //
 // Say hello, setup include path(s)
 //
@@ -274,6 +278,7 @@ while (!feof($amiSocket))
 				{
 					$assignedNum = $numSplit[1];
 				}
+				$tmpCallerID = $e['CallerIDName'];
 				$query = sprintf("INSERT INTO asterisk_log (asterisk_id, call_record_id, channel, callstate, direction, callerID, recipientID, timestampCall) VALUES('%s','%s','%s','%s','%s','%s','%s',%s)", /* $e['SrcUniqueID'] */
 					$e['UniqueID'], $callRecordId, $e['Destination'], 'Dial', 'I', $tmpCallerID, $assignedNum, 'NOW()'
 				);
