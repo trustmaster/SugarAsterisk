@@ -74,18 +74,19 @@ if (is_numeric($_GET['id'])) {
 	$found = false;
     $files_wav = glob($sugar_config['asterisk_recordings'] . '/*' . $callID . '.wav');
 	$files_mp3 = glob($sugar_config['asterisk_recordings'] . '/*' . $callID . '.mp3');
-	if (count($files_wav) == 1) {
+	if (count($files_wav) == 1 && filesize($files_wav[0]) > 0) {
+		$path = $files_wav[0];
 		$content_type = 'audio/wav';
 		$file_ext = 'wav';
 		$found = true;
-	} elseif (count($files_mp3) == 1) {
+	} elseif (count($files_mp3) == 1 && filesize($files_mp3[0]) > 0) {
+		$path = $files_mp3[0];
 		$content_type = 'audio/mpeg';
 		$file_ext = 'mp3';
 		$found = true;
 	}
 	
     if ($found) {
-		$path = $files[0];
 		header('Content-Type: ' . $content_type);
 		header('Content-Length: ' . filesize($path));
 		if ($_GET['dl'])
