@@ -12,9 +12,11 @@ This is a modified version of SugarAsterisk module originally made by KINAMU/abc
 ## Requirements ##
 
 * Asterisk 1.8 with Asterisk Manager enabled
-* SugarCRM 6.2+
+* SugarCRM 6.2
 * PHP 5.2+
 * MySQL 5.0+
+
+If you need Asterisk 1.6 or SugarCRM 6.4+ support, have a look at https://github.com/blak3r/yaai
 
 ## Installation ##
 
