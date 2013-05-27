@@ -1,7 +1,7 @@
 <?php
 /*********************************************************************************
- * SugarCRM is a customer relationship management program developed by
- * SugarCRM, Inc. Copyright (C) 2004-2011 SugarCRM Inc.
+ * SugarCRM Community Edition is a customer relationship management program developed by
+ * SugarCRM, Inc. Copyright (C) 2004-2012 SugarCRM Inc.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by the
@@ -41,8 +41,7 @@ array (
   array (
     'templateMeta' =>
     array (
-      'form' =>
-      array (
+      'form' => array (
         'buttons' =>
         array (
           0 => 'EDIT',
@@ -50,21 +49,82 @@ array (
           2 => 'DELETE',
           3 =>
           array (
-            'customCode' => '{if $fields.status.value != "Held"} <input type="hidden" name="isSaveAndNew" value="false">  <input type="hidden" name="status" value="">  <input type="hidden" name="isSaveFromDetailView" value="true">  <input title="{$APP.LBL_CLOSE_AND_CREATE_BUTTON_TITLE}"  accesskey="{$APP.LBL_CLOSE_AND_CREATE_BUTTON_KEY}"  class="button"  onclick="this.form.status.value=\'Held\'; this.form.action.value=\'Save\';this.form.return_module.value=\'Calls\';this.form.isDuplicate.value=true;this.form.isSaveAndNew.value=true;this.form.return_action.value=\'EditView\'; this.form.return_id.value=\'{$fields.id.value}\'"  name="button"  value="{$APP.LBL_CLOSE_AND_CREATE_BUTTON_TITLE}"  type="submit">{/if}',
+            'customCode' => '{if $fields.status.value != "Held" && $bean->aclAccess("edit")} <input type="hidden" name="isSaveAndNew" value="false">  <input type="hidden" name="status" value="">  <input type="hidden" name="isSaveFromDetailView" value="true">  <input title="{$APP.LBL_CLOSE_AND_CREATE_BUTTON_TITLE}"   class="button"  onclick="this.form.status.value=\'Held\'; this.form.action.value=\'Save\';this.form.return_module.value=\'Calls\';this.form.isDuplicate.value=true;this.form.isSaveAndNew.value=true;this.form.return_action.value=\'EditView\'; this.form.return_id.value=\'{$fields.id.value}\'" id="close_create_button" name="button"  value="{$APP.LBL_CLOSE_AND_CREATE_BUTTON_TITLE}"  type="submit">{/if}',
+              //Bug#51778: The custom code will be replaced with sugar_html. customCode will be deplicated.
+              'sugar_html' => array(
+                  'type' => 'submit',
+                  'value' => '{$APP.LBL_CLOSE_AND_CREATE_BUTTON_TITLE}',
+                  'htmlOptions' => array(
+                      'title' => '{$APP.LBL_CLOSE_AND_CREATE_BUTTON_TITLE}',
+                      'class' => 'button',
+                      'onclick' => 'this.form.isSaveFromDetailView.value=true; this.form.status.value=\'Held\'; this.form.action.value=\'Save\';this.form.return_module.value=\'Calls\';this.form.isDuplicate.value=true;this.form.isSaveAndNew.value=true;this.form.return_action.value=\'EditView\'; this.form.return_id.value=\'{$fields.id.value}\'',
+                      'name' => 'button',
+                      'id' => 'close_create_button',
+                  ),
+                  'template' => '{if $fields.status.value != "Held" && $bean->aclAccess("edit")}[CONTENT]{/if}',
+              ),
+
           ),
           4 =>
           array (
-            'customCode' => '{if $fields.status.value != "Held"} <input type="hidden" name="isSave" value="false">  <input title="{$APP.LBL_CLOSE_BUTTON_TITLE}"  accesskey="{$APP.LBL_CLOSE_BUTTON_KEY}"  class="button"  onclick="this.form.status.value=\'Held\'; this.form.action.value=\'Save\';this.form.return_module.value=\'Calls\';this.form.isSave.value=true;this.form.return_action.value=\'DetailView\'; this.form.return_id.value=\'{$fields.id.value}\'"  name="button1"  value="{$APP.LBL_CLOSE_BUTTON_TITLE}"  type="submit">{/if}',
+            'customCode' => '{if $fields.status.value != "Held" && $bean->aclAccess("edit")} <input type="hidden" name="isSave" value="false">  <input title="{$APP.LBL_CLOSE_BUTTON_TITLE}"  accesskey="{$APP.LBL_CLOSE_BUTTON_KEY}"  class="button"  onclick="this.form.status.value=\'Held\'; this.form.action.value=\'Save\';this.form.return_module.value=\'Calls\';this.form.isSave.value=true;this.form.return_action.value=\'DetailView\'; this.form.return_id.value=\'{$fields.id.value}\'" id="close_button" name="button1"  value="{$APP.LBL_CLOSE_BUTTON_TITLE}"  type="submit">{/if}',
+              //Bug#51778: The custom code will be replaced with sugar_html. customCode will be deplicated.
+              'sugar_html' => array(
+                  'type' => 'submit',
+                  'value' => '{$APP.LBL_CLOSE_BUTTON_TITLE}',
+                  'htmlOptions' => array(
+                      'title' => '{$APP.LBL_CLOSE_BUTTON_TITLE}',
+                      'accesskey' => '{$APP.LBL_CLOSE_BUTTON_KEY}',
+                      'class' => 'button',
+                      'onclick' => 'this.form.status.value=\'Held\'; this.form.action.value=\'Save\';this.form.return_module.value=\'Calls\';this.form.isSave.value=true;this.form.return_action.value=\'DetailView\'; this.form.return_id.value=\'{$fields.id.value}\';this.form.isSaveFromDetailView.value=true',
+                      'name' => 'button1',
+                      'id' => 'close_button',
+                  ),
+                  'template' => '{if $fields.status.value != "Held" && $bean->aclAccess("edit")}[CONTENT]{/if}'
+              ),
+
           ),
-	 5 =>
-	    array(
-		'customCode' => '{if is_numeric($fields.description.value)}<input type="button" class="button" title="Прослушать звонок" value="{sugar_translate label=\'LBL_ASTERISK_LISTEN\' module=\'Calls\'}" onclick="window.open(\'custom/modules/Asterisk/include/callDownload.php?id={$fields.description.value}\', \'asteriskListenWindow\')" />{/if}',
-	    ),
-	 6 =>
-	    array(
-		'customCode' => '{if is_numeric($fields.description.value)}<input type="button" class="button" title="Скачать запись звонка" value="{sugar_translate label=\'LBL_ASTERISK_DOWNLOAD\' module=\'Calls\'}" onclick="window.open(\'custom/modules/Asterisk/include/callDownload.php?id={$fields.description.value}&dl=1\', \'asteriskListenWindow\')" />{/if}',
-	    ),
+          5 =>
+          array(
+            'customCode' => '{if is_numeric($fields.asterisk_call_id_c.value)}<input type="button" class="button" title="Listen to this call" value="{sugar_translate label=\'LBL_ASTERISK_LISTEN\' module=\'Calls\'}" onclick="window.open(\'custom/modules/Asterisk/include/callDownload.php?id={$fields.asterisk_call_id_c.value}\', \'asteriskListenWindow\')" />{/if}',
+            'sugar_html' => array(
+                'type' => 'button',
+                'value' => 'Listen', // TODO localize
+                'htmlOptions' => array(
+                  'title' => 'Listen to this call', // TODO localize
+                  'class' => 'button',
+                  'onclick' => 'window.open(\'custom/modules/Asterisk/include/callDownload.php?id={$fields.asterisk_call_id_c.value}\', \'asteriskListenWindow\')',
+                  'name' => 'recording_listen',
+                  'id' => 'recording_listen_button'
+                ),
+                'template' => '{if $fields.status.value == "Held" && is_numeric($fields.asterisk_call_id_c.value)}[CONTENT]{/if}'
+              ),
+          ),
+          6 =>
+          array(
+            'customCode' => '{if is_numeric($fields.asterisk_call_id_c.value)}<input type="button" class="button" title="Download call record" value="{sugar_translate label=\'LBL_ASTERISK_DOWNLOAD\' module=\'Calls\'}" onclick="window.open(\'custom/modules/Asterisk/include/callDownload.php?id={$fields.asterisk_call_id_c.value}&dl=1\', \'asteriskListenWindow\')" />{/if}',
+            'sugar_html' => array(
+                'type' => 'button',
+                'value' => 'Download', // TODO localize
+                'htmlOptions' => array(
+                  'title' => 'Download call record', // TODO localize
+                  'class' => 'button',
+                  'onclick' => 'window.open(\'custom/modules/Asterisk/include/callDownload.php?id={$fields.asterisk_call_id_c.value}&dl=1\', \'asteriskListenWindow\')',
+                  'name' => 'recording_download',
+                  'id' => 'recording_download_button'
+                ),
+                'template' => '{if $fields.status.value == "Held" && is_numeric($fields.asterisk_call_id_c.value)}[CONTENT]{/if}'
+              ),
+          ),
         ),
+        'hidden' => array(
+            '<input type="hidden" name="isSaveAndNew">',
+            '<input type="hidden" name="status">',
+            '<input type="hidden" name="isSaveFromDetailView">',
+            '<input type="hidden" name="isSave">'
+
+        ),
+        'headerTpl' => 'modules/Calls/tpls/detailHeader.tpl',
       ),
       'maxColumns' => '2',
       'widths' =>
@@ -115,13 +175,10 @@ array (
             'customCode' => '{$fields.duration_hours.value}{$MOD.LBL_HOURS_ABBREV} {$fields.duration_minutes.value}{$MOD.LBL_MINSS_ABBREV}&nbsp;',
             'label' => 'LBL_DURATION',
           ),
-          array (
-            'name' => 'reminder_checked',
-            'fields' =>
-            array (
-              'reminder_checked',
-              'reminder_time',
-            ),
+          array(
+            'name' => 'reminder_time',
+            'customCode' => '{include file="modules/Meetings/tpls/reminders.tpl"}',
+            'label' => 'LBL_REMINDER',
           ),
         ),
         array (
