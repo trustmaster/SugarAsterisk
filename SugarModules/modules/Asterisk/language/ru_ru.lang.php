@@ -31,37 +31,48 @@
  * Section 5 of the GNU General Public License version 3.
  *
  */
-if (!defined('sugarEntry') || !sugarEntry)
-    die('Not A Valid Entry Point');
+if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');
 
-$mod_strings = array(
-    'ASTERISKLBL_COMING_IN' => 'Входящий звонок',
-    'ASTERISKLBL_GOING_OUT' => 'Исходящий звонок',
-    'ASTERISKLBL_DENY' => 'Отклонить',
-    'ASTERISKLBL_OPEN_CONTACT' => 'Открыть контакт',
-    'ASTERISKLBL_OPEN_MEMO' => 'Открыть памятку',
-    'ASTERISKLBL_PHONE' => 'Телефон',
-    'ASTERISKLBL_NAME' => 'Имя',
-    'ASTERISKLBL_COMPANY' => 'Компания',
-    'REQUESTED' => 'Набор номера',
-    'PROCEEDING' => 'Набор номера',
-    'RINGBACK' => 'Ожидание ответа',
-    'INCOMING' => 'Звонок',
-    'RINGING' => 'Звонок',
-    'CONNECTED' => 'Соединено',
-    'DIAL' => 'Звонок',
-    'AUTORECORD' => 'Новый звонок',
-    'INPROGRESS' => 'В обработке',
-    'INBOUND' => 'Входящий',
-    'OUTBOUND' => 'Исходящий',
-    'INTERNAL' => 'Внутренний',
-    'HELDCALL' => 'Обработан',
-    'SUCCESSFUL' => 'Успешный звонок',
-    'MISSED' => 'Пропущен',
-    'FAILEDCALL' => 'Неудачный звонок',
-    'MISSEDFAILED' => 'Пропущенный или сорвавшийся звонок',
-    'CALLERID' => '№ звонившего',
-    'CREATE_CONTACT' => 'Создать новый контакт',
-    'CALLID' => '№ звонка: ',
-);
+$mod_strings = array (
+
+   	'ASTERISKLBL_COMING_IN' 		=>	'Входящий звонок',
+	'ASTERISKLBL_GOING_OUT' 		=>	'Исходящий звонок',
+
+	'ASTERISKLBL_DENY' 			=>	'Отклонить',
+	'ASTERISKLBL_OPEN_CONTACT' 	=>	'Открыть контакт',
+	'ASTERISKLBL_OPEN_MEMO' 	=>	'Открыть памятку',
+
+	'ASTERISKLBL_PHONE' 			=>	'Телефон',
+	'ASTERISKLBL_NAME' 			=>	'Имя',
+	'ASTERISKLBL_COMPANY' 		=>	'Аккаунт',
+
+
+	'REQUESTED' 			=>	'Набор номера',
+	'PROCEEDING' 			=>	'Набор номера',
+	'RINGBACK' 				=>	'Ожидание ответа',
+	'INCOMING' 				=>	'Звонок',
+	'RINGING' 				=>	'Звонок',
+	'CONNECTED' 			=>	'Соединено',
+	'DIAL'					=>  'Звонок',
+	'HANGUP'				=>	'Завершено',
+
+	// Added in v2.2
+	'ASTERISKLBL_DURATION'         => 'Продолжительность',
+	'ASTERISKLBL_SELECTCONTACT'    => 'Выберите контакт',
+	'ASTERISKLBL_MULTIPLE_MATCHES' => "Несколько совпадений",
+	'ASTERISKLBL_CALLERID'         => 'CallerID',
+
+    // For asteriskLogger.php SOAP call entries
+    'CALL_AUTOMATIC_RECORD'         => '** Авто-запись **',
+	'CALL_IN_LIMBO'                 => 'В процессе',
+	'CALL_STATUS_HELD'              => 'Принят',
+	'CALL_STATUS_MISSED'            => 'Пропущен',
+	'CALL_NAME_CALL'                => 'Звонок',
+	'CALL_NAME_MISSED'              => 'Пропущенный звонок',
+	'CALL_DESCRIPTION_CALLER_ID'    => 'Номер звонившего',
+	'CALL_DESCRIPTION_MISSED'       => 'Пропущенный/неудачный звонок',
+	'CALL_DESCRIPTION_PHONE_NUMBER' => 'Номер телефона'
+
+   );
+
 ?>

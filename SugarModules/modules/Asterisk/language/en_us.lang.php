@@ -31,37 +31,47 @@
  * Section 5 of the GNU General Public License version 3.
  *
  */
-if (!defined('sugarEntry') || !sugarEntry)
-    die('Not A Valid Entry Point');
+if(!defined('sugarEntry') || !sugarEntry) die('Not A Valid Entry Point');
 
-$mod_strings = array(
-    'ASTERISKLBL_COMING_IN' => 'Incoming call',
-    'ASTERISKLBL_GOING_OUT' => 'Outgoing call',
-    'ASTERISKLBL_DENY' => 'Decline',
-    'ASTERISKLBL_OPEN_CONTACT' => 'Open Contact',
-    'ASTERISKLBL_OPEN_MEMO' => 'Open Memo',
-    'ASTERISKLBL_PHONE' => 'Phone',
-    'ASTERISKLBL_NAME' => 'Name',
-    'ASTERISKLBL_COMPANY' => 'Account',
-    'REQUESTED' => 'Proceeding',
-    'PROCEEDING' => 'Proceeding',
-    'RINGBACK' => 'Waiting for Answer',
-    'INCOMING' => 'Ringing',
-    'RINGING' => 'Ringing',
-    'CONNECTED' => 'Connected',
-    'DIAL' => 'Ringing',
-    'AUTORECORD' => 'New Call',
-    'INPROGRESS' => 'In Progress',
-    'INBOUND' => 'Inbound',
-    'OUTBOUND' => 'Outbound',
-    'INTERNAL' => 'Internal',
-    'HELDCALL' => 'Processed',
-    'SUCCESSFUL' => 'Successfull call',
-    'MISSED' => 'Missed',
-    'FAILEDCALL' => 'Failed call',
-    'MISSEDFAILED' => 'Missed or failed call',
-    'CALLERID' => 'Caller no.',
-    'CREATE_CONTACT' => 'Create New Contact',
-    'CALLID' => 'Call #: ',
-);
+$mod_strings = array (
+
+   	'ASTERISKLBL_COMING_IN' 		=>	'Incoming call',
+	'ASTERISKLBL_GOING_OUT' 		=>	'Outgoing call',
+
+	'ASTERISKLBL_DENY' 			=>	'Decline',
+	'ASTERISKLBL_OPEN_CONTACT' 	=>	'Open Contact',
+	'ASTERISKLBL_OPEN_MEMO' 	=>	'Open Memo',
+
+    'ASTERISKLBL_PHONE' 			=>	'Phone',
+	'ASTERISKLBL_NAME' 			=>	'Name',
+	'ASTERISKLBL_COMPANY' 		=>	'Account',
+
+	'REQUESTED' 			=>	'Proceeding',
+	'PROCEEDING' 			=>	'Proceeding',
+	'RINGBACK' 				=>	'Waiting for Answer',
+	'INCOMING' 				=>	'Ringing',
+	'RINGING' 				=>	'Ringing',
+	'CONNECTED' 			=>	'Connected',
+	'DIAL'					=>  'Ringing',
+	'HANGUP'                =>  'Finished',
+
+    // Added in v2.2
+	'ASTERISKLBL_DURATION'         => 'Duration',
+	'ASTERISKLBL_SELECTCONTACT'    => 'Select Contact',
+	'ASTERISKLBL_MULTIPLE_MATCHES' => "Multiple Matches",
+	'ASTERISKLBL_CALLERID'         => 'CallerID',
+
+    // For asteriskLogger.php SOAP call entries
+	'CALL_AUTOMATIC_RECORD'         => '** Automatic record **',
+	'CALL_IN_LIMBO'                 => 'In Limbo',
+	'CALL_STATUS_HELD'              => 'Held',
+	'CALL_STATUS_MISSED'            => 'Missed',
+	'CALL_NAME_CALL'                => 'CALL',
+	'CALL_NAME_MISSED'              => 'Missed Call',
+	'CALL_DESCRIPTION_CALLER_ID'    => 'Caller ID',
+	'CALL_DESCRIPTION_MISSED'       => 'Missed/failed call',
+	'CALL_DESCRIPTION_PHONE_NUMBER' => 'Phone Number'
+
+   );
+
 ?>

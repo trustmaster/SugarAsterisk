@@ -1,0 +1,29 @@
+<?php
+
+
+$str = "Currently run5ning a lookup for phone '4106611098'. Please check back in a few seconds.";
+
+if( strpos($str, "running a lookup") !== false ) {
+    print "strpos worked";
+}
+
+if( preg_match('/running a lookup/', $str) ) {
+    print "match found";
+}
+else {
+    print "NOT FOUND";
+}
+
+function opencnam_fetch( $phoneNumber ) {
+$request_url = "https://api.opencnam.com/v1/phone/" . $phoneNumber . "?format=text";
+//
+//$request = curl_init();
+//curl_setopt($request, CURLOPT_URL, $request_url);
+//curl_setopt($request, CURLOPT_RETURNTRANSFER, TRUE);
+//$response = curl_exec($request);
+
+
+    return $response;
+}
+
+?>
