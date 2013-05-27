@@ -8,7 +8,6 @@
  * Parts of this code are (c) 2008 vertico software GmbH
  * Parts of this code are (c) 2009 abcona e. K. Angelo Malaguarnera E-Mail admin@abcona.de
  * http://www.sugarforge.org/projects/yaai/
- * Parts of this code are (c) 2011 Vladimir Sibirov contact@kodigy.com
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License version 3 as published by the
@@ -105,6 +104,8 @@
 		{/if}
 			<input type='text' name='asterisk_context' size="45" value='{$asterisk_context}'>
 		</td>
+
+	</tr><tr>
 		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_PREFIX}: </td>
 		<td width="25%" class="dataField">
 		{if empty($config.asterisk_prefix )}
@@ -114,16 +115,16 @@
 		{/if}
 			<input type='text' name='asterisk_prefix' size="45" value='{$asterisk_prefix}'>
 		</td>
-	</tr><tr>
-		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_EXPR}: </td>
+		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_DIALINPREFIX}: </td>
 		<td width="25%" class="dataField">
-		{if empty($config.asterisk_expr )}
-			{assign var='asterisk_expr' value=$asterisk_config.asterisk_expr}
+		{if empty($config.asterisk_dialinPrefix )}
+			{assign var='asterisk_dialinPrefix' value=$asterisk_config.asterisk_dialinPrefix}
 		{else}
-			{assign var='asterisk_expr' value=$config.asterisk_expr}
+			{assign var='asterisk_dialinPrefix' value=$config.asterisk_dialinPrefix}
 		{/if}
-			<input type='text' name='asterisk_expr' size="45" value='{$asterisk_expr}'>
+			<input type='text' name='asterisk_dialinPrefix' size="45" value='{$asterisk_dialinPrefix}'>
 		</td>
+	</tr><tr>
 		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_SOAPUSER}: </td>
 		<td width="25%" class="dataField">
 		{if empty($config.asterisk_soapuser )}
@@ -132,8 +133,114 @@
 			{assign var='asterisk_soapuser' value=$config.asterisk_soapuser}
 		{/if}
 			<input type='text' name='asterisk_soapuser' size="45" value='{$asterisk_soapuser}'>
+            <br/><span style="font-size:0.7em;color: gray;">*Note this is a SugarCRM user (Not an Asterisk User) that will be used by asteriskLogger when making SOAP calls.</span>
 		</td>
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_SOAPPASS}: </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_soappass )}
+            {assign var='asterisk_soapppass' value=$asterisk_config.asterisk_soappass}
+            {else}
+            {assign var='asterisk_soapppass' value=$config.asterisk_soappass}
+        {/if}
+            <input type='text' name='asterisk_soappass' size="45" value='{$asterisk_soappass}'>
+            <br/><span style="font-size:0.9em;color: gray;">*Password may not be displayed here after reloading page.  I'm not sure why but saving still works.  I thought this behavior was actually ideal for security purposes!  When in doubt, look in config.override.ini for asterisk_soappass to confirm..</span>
+        </td>
+	</tr>
+
+    <tr>
+        <td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_EXPR}: </td>
+        <td width="25%" class="dataField">
+        {if empty($config.asterisk_expr )}
+            {assign var='asterisk_expr' value=$asterisk_config.asterisk_expr}
+            {else}
+            {assign var='asterisk_expr' value=$config.asterisk_expr}
+        {/if}
+            <input type='text' name='asterisk_expr' size="45" value='{$asterisk_expr}'>
+        </td>
+        <TD>&nbsp;</TD>
+        <td>&nbsp;</td>
+    </tr>
+
+
+	<!-- Added in yaii 2.0 -->
+
 	</tr><tr>
+		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_DIALOUT_CHANNEL}: </td>
+		<td width="25%" class="dataField">
+		{if empty($config.asterisk_dialout_channel )}
+			{assign var='asterisk_dialout_channel' value=$asterisk_config.asterisk_dialout_channel}
+		{else}
+			{assign var='asterisk_dialout_channel' value=$config.asterisk_dialout_channel}
+		{/if}
+			<input type='text' name='asterisk_dialout_channel' size="45" value='{$asterisk_dialout_channel}'>
+		</td>
+		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_DIALIN_EXT_MATCH}: </td>
+		<td width="25%" class="dataField">
+		{if empty($config.asterisk_dialin_ext_match )}
+			{assign var='asterisk_dialin_ext_match' value=$asterisk_config.asterisk_dialin_ext_match}
+		{else}
+			{assign var='asterisk_dialin_ext_match' value=$config.asterisk_dialin_ext_match}
+		{/if}
+			<input type='text' name='asterisk_dialin_ext_match' size="45" value='{$asterisk_dialin_ext_match}'>
+		</td>
+	</tr>
+
+	<tr>
+		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_CALL_SUBJECT_INBOUND_ABBR}: </td>
+		<td width="25%" class="dataField">
+		{if empty($config.asterisk_call_subject_inbound_abbr )}
+			{assign var='asterisk_call_subject_inbound_abbr' value=$asterisk_config.asterisk_call_subject_inbound_abbr}
+		{else}
+			{assign var='asterisk_call_subject_inbound_abbr' value=$config.asterisk_call_subject_inbound_abbr}
+		{/if}
+			<input type='text' name='asterisk_call_subject_inbound_abbr' size="45" value='{$asterisk_call_subject_inbound_abbr}'>
+		</td>
+		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_CALL_SUBJECT_OUTBOUND_ABBR}: </td>
+		<td width="25%" class="dataField">
+		{if empty($config.asterisk_call_subject_outbound_abbr )}
+			{assign var='asterisk_call_subject_outbound_abbr' value=$asterisk_config.asterisk_call_subject_outbound_abbr}
+		{else}
+			{assign var='asterisk_call_subject_outbound_abbr' value=$config.asterisk_call_subject_outbound_abbr}
+		{/if}
+			<input type='text' name='asterisk_call_subject_outbound_abbr' size="45" value='{$asterisk_call_subject_outbound_abbr}'>
+		</td>
+	</tr>
+
+	<tr>
+		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_CALL_SUBJECT_MAX_LENGTH}: </td>
+		<td width="25%" class="dataField">
+		{if empty($config.asterisk_call_subject_max_length )}
+			{assign var='asterisk_call_subject_max_length' value=$asterisk_config.asterisk_call_subject_max_length}
+		{else}
+			{assign var='asterisk_call_subject_max_length' value=$config.asterisk_call_subject_max_length}
+		{/if}
+			<input type='text' name='asterisk_call_subject_max_length' size="45" value='{$asterisk_call_subject_max_length}'>
+		</td>
+		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_LISTENER_POLL_RATE}: </td>
+		<td width="25%" class="dataField">
+		{if empty($config.asterisk_listener_poll_rate )}
+			{assign var='asterisk_listener_poll_rate' value=$asterisk_config.asterisk_listener_poll_rate}
+		{else}
+			{assign var='asterisk_listener_poll_rate' value=$config.asterisk_listener_poll_rate}
+		{/if}
+			<input type='text' name='asterisk_listener_poll_rate' size="45" value='{$asterisk_listener_poll_rate}'>
+		</td>
+	</tr>
+
+	<tr>
+		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_LOG_FILE}: </td>
+		<td width="25%" class="dataField">
+		{if empty($config.asterisk_log_file )}
+			{assign var='asterisk_log_file' value=$asterisk_config.asterisk_log_file}
+		{else}
+			{assign var='asterisk_log_file' value=$config.asterisk_log_file}
+		{/if}
+			<input type='text' name='asterisk_log_file' size="45" value='{$asterisk_log_file}'>
+		</td>
+		<TD>&nbsp;</TD>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
 		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_ASTERISK_RECORDINGS}: </td>
 		<td width="25%" class="dataField">
 		{if empty($config.asterisk_recordings )}
@@ -148,6 +255,24 @@
 		    &nbsp;
 		</td>
 	</tr>
+
+<!--
+
+	<tr>
+		<td nowrap width="10%" class="dataLabel">{$MOD.LBL_LEFT_FIELD}: </td>
+		<td width="25%" class="dataField">
+		{if empty($config.left_field )}
+			{assign var='left_field' value=$asterisk_config.left_field}
+		{else}
+			{assign var='left_field' value=$config.left_field}
+		{/if}
+			<input type='text' name='left_field' size="45" value='{$left_field}'>
+		</td>
+		<TD>&nbsp;</TD>
+	</tr>
+
+	-->
+
 </table>
 </td></tr>
 </table>
@@ -157,7 +282,7 @@
 <div style="padding-top: 2px;">
 <input title="{$APP.LBL_SAVE_BUTTON_TITLE}" class="button"  type="submit" name="save" value="  {$APP.LBL_SAVE_BUTTON_LABEL}  " />
 		&nbsp;<input title="{$MOD.LBL_SAVE_BUTTON_TITLE}"  class="button"  type="submit" name="restore" value="  {$MOD.LBL_RESTORE_BUTTON_LABEL}  " />
-		&nbsp;<input title="{$MOD.LBL_CANCEL_BUTTON_TITLE}"  onclick="document.location.href='index.php?module=Administration&action=index'" class="button"  type="button" name="cancel" value="  {$APP.LBL_CANCEL_BUTTON_LABEL}  " />
+&nbsp;<input title="{$MOD.LBL_CANCEL_BUTTON_TITLE}"  onclick="document.location.href='index.php?module=Administration&action=index'" class="button"  type="button" name="cancel" value="  {$APP.LBL_CANCEL_BUTTON_LABEL}  " />
 </div>
 {$JAVASCRIPT}
 
